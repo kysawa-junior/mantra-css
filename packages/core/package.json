@@ -1,0 +1,21 @@
+{
+  "name": "@mantra-css/core",
+  "version": "0.1.0",
+  "description": "Zero-runtime CSS-in-JS core inspired by Stitches, named Mantra",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "typescript": "^6.0.3"
+  },
+  "publishConfig": {
+    "access": "public" 
+  }
+}

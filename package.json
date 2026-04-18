@@ -1,0 +1,14 @@
+{
+  "name": "mantra-css",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mantra - Zero-runtime CSS-in-JS library",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev:core": "pnpm --filter @mantra-css/core run dev",
+    "dev:babel": "pnpm --filter @mantra-css/babel-plugin run dev"
+  },
+  "publishConfig": {
+    "access": "public" 
+  }
+}
