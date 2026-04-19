@@ -8,8 +8,5 @@
     "dev:core": "pnpm --filter @mantra-css/core run dev",
     "dev:babel": "pnpm --filter @mantra-css/babel-plugin run dev",
     "dev:react": "pnpm --filter @mantra-css/react run dev"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
