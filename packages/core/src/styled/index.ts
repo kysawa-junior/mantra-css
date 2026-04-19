@@ -1,74 +1,65 @@
-import React from 'react';
-import { hash, stringifyCSS } from '../core';
-import { StyledConfig, StyledComponent, CSSWithUtils, AnyUtils } from '../types';
+import { hash, stringifyCSS } from "../core";
+import {
+  StyledConfig,
+  StyledRecipe,
+  CSSWithUtils,
+  VariantDefinition,
+  AnyUtils,
+} from "../types";
 
 export function createStyled(config: any) {
-  return function styled<T extends keyof React.JSX.IntrinsicElements>(
-    element: T
-  ) {
-    return function <TUtils extends AnyUtils>(
-      styledConfig: StyledConfig<any, TUtils>
-    ): StyledComponent<React.ComponentProps<T> & { css?: CSSWithUtils<TUtils> }> {
-      
-      const className = `mantra-${hash(JSON.stringify(styledConfig))}`;
-      
-      let cssText = '';
-      if (styledConfig.base) {
-        cssText += stringifyCSS(`.${className}`, styledConfig.base);
-      }
+  return function styled<
+    T extends string,
+    TVariants extends VariantDefinition,
+    TUtils extends AnyUtils,
+  >(
+    element: T,
+    styledConfig: StyledConfig<TUtils> & { variants?: TVariants },
+  ): StyledRecipe<TVariants> {
+    const className = `mantra-${hash(JSON.stringify(styledConfig))}`;
+    let cssText = "";
+    const variantClassMappings: Record<string, Record<string, string>> = {};
 
-      if (styledConfig.variants) {
-        for (const [vName, vMap] of Object.entries(styledConfig.variants)) {
-          for (const [vValue, vStyle] of Object.entries(vMap as Record<string, any>)) {
-            const vClass = `${className}-${vName}-${vValue}`;
-            cssText += stringifyCSS(`.${vClass}`, vStyle);
-          }
+    if (styledConfig.base) {
+      cssText += stringifyCSS(`.${className}`, styledConfig.base);
+    }
+
+    if (styledConfig.variants) {
+      for (const [vName, vMap] of Object.entries(styledConfig.variants)) {
+        variantClassMappings[vName] = {};
+        for (const [vValue, vStyle] of Object.entries(
+          vMap as Record<string, any>,
+        )) {
+          const vClass = `${className}-${vName}-${vValue}`;
+          variantClassMappings[vName][vValue] = vClass;
+          cssText += stringifyCSS(`.${vClass}`, vStyle);
         }
       }
+    }
 
-      // React 19 Component: ref is just a standard prop
-      const Component = (props: any) => {
-        const { ref, className: externalClassName, css, ...restProps } = props;
-        let computedClassName = className;
+    const resolve = (props: Record<string, any>): string => {
+      let computedClassName = className;
 
-        // Handle variants and remove them from restProps so they don't hit the DOM
-        if (styledConfig.variants) {
-          for (const [vName, vMap] of Object.entries(styledConfig.variants)) {
-            const vValue = restProps[vName];
-            if (vValue && (vMap as Record<string, any>)[vValue]) {
-              computedClassName += ` ${className}-${vName}-${vValue}`;
-            }
-            delete restProps[vName]; // Prevent leaking to DOM
-          }
+      for (const [vName, vMap] of Object.entries(variantClassMappings)) {
+        const vValue = props[vName];
+        if (vValue && vMap[vValue]) {
+          computedClassName += ` ${vMap[vValue]}`;
         }
+      }
 
-        // Handle dynamic css prop
-        if (css) {
-          const dynamicClass = `mantra-css-${hash(JSON.stringify(css))}`;
-          computedClassName += ` ${dynamicClass}`;
-        }
+      if (props.className) {
+        computedClassName += ` ${props.className}`;
+      }
 
-        // Handle external className
-        if (externalClassName) {
-          computedClassName += ` ${externalClassName}`;
-        }
+      return computedClassName;
+    };
 
-        // Fix 2: Cast 'element' to string. keyof IntrinsicElements can be string | number | symbol,
-        // but React.createElement only accepts strings or components.
-        return React.createElement(element as string, { ...restProps, ref, className: computedClassName });
-      };
-
-      // Fix 3: Wrap element in String() to avoid the "Implicit conversion of a 'symbol' to a 'string'" error
-      Component.displayName = `Mantra(${String(element)})`;
-      
-      // Attach metadata for the Babel plugin to extract during build time
-      (Component as any).__mantra__ = {
-        baseClassName: className,
-        cssText,
-        config: styledConfig,
-      };
-
-      return Component;
+    return {
+      element,
+      baseClassName: className,
+      cssText,
+      variantClassMappings,
+      resolve,
     };
   };
 }

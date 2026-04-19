@@ -1,6 +1,6 @@
 {
   "name": "mantra-css",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Mantra - Zero-runtime CSS-in-JS library",
   "scripts": {
@@ -9,6 +9,6 @@
     "dev:babel": "pnpm --filter @mantra-css/babel-plugin run dev"
   },
   "publishConfig": {
-    "access": "public" 
+    "access": "public"
   }
 }

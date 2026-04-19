@@ -1,10 +1,17 @@
-import { createStyled } from './styled';
-import { createCss } from './css';
-import { createThemeTokens } from './theme';
-import { MantraConfig } from './types';
-import { stringifyCSS } from './core';
+import { createStyled } from "./styled";
+import { createCss } from "./css";
+import { createThemeTokens } from "./theme";
+import { MantraConfig } from "./types";
+import { stringifyCSS } from "./core";
 
-export type { MantraConfig, StyledConfig, CSSWithUtils } from './types';
+export type {
+  MantraConfig,
+  StyledConfig,
+  CSSWithUtils,
+  StyledRecipe,
+  VariantProps,
+  VariantDefinition
+} from "./types";
 
 export function createMantra(config: MantraConfig = {}) {
   const themeResult = createThemeTokens(config.theme || {});
@@ -16,7 +23,7 @@ export function createMantra(config: MantraConfig = {}) {
     css,
     theme: themeResult,
     globalCss: (styles: Record<string, any>) => {
-      let cssText = '';
+      let cssText = "";
       for (const [selector, style] of Object.entries(styles)) {
         cssText += stringifyCSS(selector, style);
       }
@@ -25,4 +32,4 @@ export function createMantra(config: MantraConfig = {}) {
   };
 }
 
-export { hash, stringifyCSS } from './core';
+export { hash, stringifyCSS } from "./core";

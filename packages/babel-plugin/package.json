@@ -1,6 +1,6 @@
 {
   "name": "@mantra-css/babel-plugin",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Babel plugin to extract Mantra styles at build time",
   "main": "dist/index.js",
   "scripts": {
@@ -15,9 +15,9 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@mantra/core": "workspace:*"
+    "@mantra-css/core": "workspace:*"
   },
   "publishConfig": {
-    "access": "public" 
+    "access": "public"
   }
 }
