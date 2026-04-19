@@ -1,6 +1,6 @@
 {
   "name": "@mantra-css/babel-plugin",
-  "version": "0.1.2",
+  "version": "0.1.1",
   "description": "Babel plugin to extract Mantra styles at build time",
   "main": "dist/index.js",
   "scripts": {
