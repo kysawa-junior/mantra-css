@@ -1,0 +1,21 @@
+{
+  "name": "@mantra/variants",
+  "version": "0.1.0",
+  "description": "Variant system for Mantra CSS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@mantra/types": "workspace:*",
+    "@mantra/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

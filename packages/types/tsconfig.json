@@ -4,8 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
-    "skipLibCheck": true
+    "emitDeclarationOnly": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src"]
 }
