@@ -1,0 +1,30 @@
+{
+  "name": "@mantra/types",
+  "version": "1.0.0",
+  "description": "Shared type definitions for Mantra CSS - Bundler Agnostic",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean --outDir dist",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch --outDir dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "tsup": "^8.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

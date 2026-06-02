@@ -1,17 +1,51 @@
 {
-  "name": "@mantra-css/core",
-  "version": "0.1.1",
-  "description": "Zero-runtime CSS-in-JS core inspired by Stitches, named Mantra",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "name": "@mantra/core",
+  "version": "1.0.0",
+  "description": "Bundler-agnostic zero-runtime CSS-in-JS core - Universal CSS generation engine",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./hashing": {
+      "types": "./dist/hashing/hash.d.ts",
+      "import": "./dist/hashing/hash.js",
+      "require": "./dist/hashing/hash.cjs"
+    },
+    "./serializer": {
+      "types": "./dist/serializer/stringify.d.ts",
+      "import": "./dist/serializer/stringify.js",
+      "require": "./dist/serializer/stringify.cjs"
+    },
+    "./css": {
+      "types": "./dist/css/generate.d.ts",
+      "import": "./dist/css/generate.js",
+      "require": "./dist/css/generate.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch"
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean --outDir dist",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch --outDir dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mantra/types": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^6.0.3"
+    "typescript": "^5.4.0",
+    "tsup": "^8.0.0"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

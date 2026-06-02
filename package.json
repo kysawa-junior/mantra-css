@@ -1,12 +1,27 @@
 {
-  "name": "mantra-css",
-  "version": "0.1.1",
+  "name": "mantra",
+  "version": "1.0.0",
   "private": true,
-  "description": "Mantra - Zero-runtime CSS-in-JS library",
+  "description": "Mantra - Zero-runtime CSS-in-JS library with bundler-agnostic architecture",
+  "type": "module",
   "scripts": {
     "build": "pnpm -r run build",
-    "dev:core": "pnpm --filter @mantra-css/core run dev",
-    "dev:babel": "pnpm --filter @mantra-css/babel-plugin run dev",
-    "dev:react": "pnpm --filter @mantra-css/react run dev"
+    "build:core": "pnpm --filter @mantra/core run build",
+    "build:react": "pnpm --filter @mantra/react run build",
+    "build:compiler": "pnpm --filter @mantra/compiler run build",
+    "build:extractor": "pnpm --filter @mantra/extractor run build",
+    "build:variants": "pnpm --filter @mantra/variants run build",
+    "build:tokens": "pnpm --filter @mantra/tokens run build",
+    "build:utils": "pnpm --filter @mantra/utils run build",
+    "build:types": "pnpm --filter @mantra/types run build",
+    "build:adapters": "pnpm -r --filter \"@mantra/adapter-*\" run build",
+    "dev": "pnpm -r run dev",
+    "test": "pnpm -r run test",
+    "lint": "eslint packages/**/*.ts",
+    "typecheck": "pnpm -r run typecheck"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

@@ -1,0 +1,43 @@
+{
+  "name": "@mantra/utils",
+  "version": "1.0.0",
+  "description": "Bundler-agnostic utilities for Mantra CSS - Zero Runtime",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./hash": {
+      "types": "./dist/hash.d.ts",
+      "import": "./dist/hash.js",
+      "require": "./dist/hash.cjs"
+    },
+    "./stringify": {
+      "types": "./dist/stringify.d.ts",
+      "import": "./dist/stringify.js",
+      "require": "./dist/stringify.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.ts src/hash.ts src/stringify.ts src/object.ts --format esm,cjs --dts --clean --outDir dist",
+    "dev": "tsup src/index.ts src/hash.ts src/stringify.ts src/object.ts --format esm,cjs --dts --watch --outDir dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mantra/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "tsup": "^8.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
