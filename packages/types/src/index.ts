@@ -1,30 +1,392 @@
 // ============================================================================
-// MANTRA TYPES - Bundler Agnostic Architecture
+// MANTRA TYPES - Advanced Zero-Runtime CSS-in-JS Architecture
 // ============================================================================
-// Core type definitions for the Mantra zero-runtime CSS-in-JS library.
-// These types are designed to be bundler-agnostic and work across:
-// - Vite, Webpack, Rspack, Rollup, ESBuild, RSBuild, Bun, Turbopack
-// - SSR, RSC, Edge Runtime, Node.js, Browser environments
+// Core type definitions with advanced inference, auto-complete support,
+// and comprehensive CSS property typing for optimal DX.
 // ============================================================================
 
 /**
- * Base CSS property value type
- * Supports strings, numbers (auto-converted to px), and special values
+ * CSS value types with token reference support
+ * Supports string, number (auto-px), null, undefined, and token references ($token)
  */
 export type CSSPropertyValue = string | number | null | undefined;
 
 /**
- * Standard CSS properties interface
- * Uses index signature to allow any valid CSS property
+ * Token reference type - enables $token syntax with autocomplete
  */
-export interface CSSProperties {
-  [property: `--${string}`]: CSSPropertyValue;
-  [property: string]: CSSPropertyValue;
+export type TokenReference<T extends string> = `$${T}`;
+
+/**
+ * CSS Custom Property reference
+ */
+export type CSSVariableReference<T extends string> = `var(--${T})`;
+
+/**
+ * Breakpoint names from theme
+ */
+export type BreakpointName<T extends ThemeTokens> = keyof T['breakpoints'] & string;
+
+/**
+ * Pseudo selectors with full CSS support
+ */
+export type PseudoSelectors = 
+  // State pseudo-classes
+  | ':hover' | ':active' | ':focus' | ':focus-visible' | ':focus-within'
+  | ':disabled' | ':enabled' | ':checked' | ':indeterminate'
+  | ':valid' | ':invalid' | ':required' | ':optional'
+  | ':read-only' | ':read-write' | ':placeholder-shown'
+  | ':autofill' | ':visited' | ':link' | ':target'
+  // Tree structural pseudo-classes
+  | ':first-child' | ':last-child' | ':only-child'
+  | ':first-of-type' | ':last-of-type' | ':only-of-type'
+  | ':nth-child' | ':nth-last-child' | ':nth-of-type' | ':nth-last-of-type'
+  | ':not' | ':where' | ':is' | ':has'
+  // Content pseudo-elements
+  | '::before' | '::after' | '::first-letter' | '::first-line'
+  | '::selection' | '::marker' | '::placeholder' | '::backdrop'
+  // Scrollbar pseudo-elements (WebKit)
+  | '::-webkit-scrollbar' | '::-webkit-scrollbar-thumb' | '::-webkit-scrollbar-track'
+  // Spelling/grammar pseudo-elements
+  | '::spelling-error' | '::grammar-error';
+
+/**
+ * Media query conditions with common breakpoints
+ */
+export type MediaQueryCondition = 
+  | '@media (min-width: 0)' | '@media (min-width: 640px)' | '@media (min-width: 768px)'
+  | '@media (min-width: 1024px)' | '@media (min-width: 1280px)' | '@media (min-width: 1536px)'
+  | '@media (max-width: 640px)' | '@media (max-width: 768px)' | '@media (max-width: 1024px)'
+  | '@media (max-width: 1280px)' | '@media (max-width: 1536px)'
+  | '@media (prefers-color-scheme: dark)' | '@media (prefers-color-scheme: light)'
+  | '@media (prefers-reduced-motion: reduce)' | '@media (prefers-reduced-motion: no-preference)'
+  | '@media print' | '@media screen' | '@media speech'
+  | '@media (orientation: portrait)' | '@media (orientation: landscape)'
+  | '@media (hover: hover)' | '@media (hover: none)'
+  | '@media (pointer: fine)' | '@media (pointer: coarse)'
+  | string;
+
+/**
+ * Support condition for @supports rule
+ */
+export type SupportCondition = 
+  | '@supports (display: grid)' | '@supports (display: flex)'
+  | '@supports (-webkit-backdrop-filter: blur(1px))'
+  | string;
+
+/**
+ * Standard CSS properties with proper value typing
+ * Comprehensive coverage of all CSS properties
+ */
+export interface StandardCSSProperties {
+  // Box Model
+  width?: CSSPropertyValue;
+  height?: CSSPropertyValue;
+  minWidth?: CSSPropertyValue;
+  minHeight?: CSSPropertyValue;
+  maxWidth?: CSSPropertyValue;
+  maxHeight?: CSSPropertyValue;
+  boxSizing?: 'border-box' | 'content-box' | 'border-box';
+  
+  // Margin
+  margin?: CSSPropertyValue;
+  marginTop?: CSSPropertyValue;
+  marginRight?: CSSPropertyValue;
+  marginBottom?: CSSPropertyValue;
+  marginLeft?: CSSPropertyValue;
+  marginX?: CSSPropertyValue;
+  marginY?: CSSPropertyValue;
+  
+  // Padding
+  padding?: CSSPropertyValue;
+  paddingTop?: CSSPropertyValue;
+  paddingRight?: CSSPropertyValue;
+  paddingBottom?: CSSPropertyValue;
+  paddingLeft?: CSSPropertyValue;
+  paddingX?: CSSPropertyValue;
+  paddingY?: CSSPropertyValue;
+  
+  // Border
+  border?: CSSPropertyValue;
+  borderTop?: CSSPropertyValue;
+  borderRight?: CSSPropertyValue;
+  borderBottom?: CSSPropertyValue;
+  borderLeft?: CSSPropertyValue;
+  borderWidth?: CSSPropertyValue;
+  borderStyle?: 'none' | 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset';
+  borderColor?: CSSPropertyValue;
+  borderRadius?: CSSPropertyValue;
+  borderTopLeftRadius?: CSSPropertyValue;
+  borderTopRightRadius?: CSSPropertyValue;
+  borderBottomLeftRadius?: CSSPropertyValue;
+  borderBottomRightRadius?: CSSPropertyValue;
+  
+  // Flexbox
+  display?: 'flex' | 'inline-flex' | 'grid' | 'inline-grid' | 'block' | 'inline-block' | 'none' | 'contents' | 'table' | 'table-row' | 'table-cell' | 'list-item';
+  flexDirection?: 'row' | 'column' | 'row-reverse' | 'column-reverse';
+  flexWrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
+  flex?: CSSPropertyValue;
+  flexGrow?: CSSPropertyValue;
+  flexShrink?: CSSPropertyValue;
+  flexBasis?: CSSPropertyValue;
+  justifyContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly' | 'stretch';
+  alignItems?: 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline';
+  alignContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'stretch';
+  alignSelf?: 'auto' | 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline';
+  gap?: CSSPropertyValue;
+  rowGap?: CSSPropertyValue;
+  columnGap?: CSSPropertyValue;
+  
+  // Grid
+  gridTemplateColumns?: CSSPropertyValue;
+  gridTemplateRows?: CSSPropertyValue;
+  gridColumn?: CSSPropertyValue;
+  gridRow?: CSSPropertyValue;
+  gridColumnStart?: CSSPropertyValue;
+  gridColumnEnd?: CSSPropertyValue;
+  gridRowStart?: CSSPropertyValue;
+  gridRowEnd?: CSSPropertyValue;
+  gridAutoFlow?: 'row' | 'column' | 'row dense' | 'column dense';
+  gridAutoColumns?: CSSPropertyValue;
+  gridAutoRows?: CSSPropertyValue;
+  
+  // Position
+  position?: 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky';
+  top?: CSSPropertyValue;
+  right?: CSSPropertyValue;
+  bottom?: CSSPropertyValue;
+  left?: CSSPropertyValue;
+  inset?: CSSPropertyValue;
+  zIndex?: CSSPropertyValue;
+  
+  // Typography
+  font?: CSSPropertyValue;
+  fontFamily?: CSSPropertyValue;
+  fontSize?: CSSPropertyValue;
+  fontWeight?: CSSPropertyValue;
+  fontStyle?: 'normal' | 'italic' | 'oblique';
+  fontVariant?: CSSPropertyValue;
+  lineHeight?: CSSPropertyValue;
+  letterSpacing?: CSSPropertyValue;
+  textAlign?: 'left' | 'right' | 'center' | 'justify' | 'start' | 'end';
+  textTransform?: 'none' | 'capitalize' | 'uppercase' | 'lowercase';
+  textDecoration?: CSSPropertyValue;
+  textDecorationLine?: 'none' | 'underline' | 'overline' | 'line-through';
+  textDecorationColor?: CSSPropertyValue;
+  textDecorationStyle?: 'solid' | 'double' | 'dotted' | 'dashed' | 'wavy';
+  textDecorationThickness?: CSSPropertyValue;
+  textUnderlineOffset?: CSSPropertyValue;
+  whiteSpace?: 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line' | 'break-spaces';
+  wordBreak?: 'normal' | 'break-all' | 'keep-all' | 'break-word';
+  overflowWrap?: 'normal' | 'break-word' | 'anywhere';
+  textOverflow?: 'clip' | 'ellipsis';
+  verticalAlign?: 'baseline' | 'top' | 'middle' | 'bottom' | 'text-top' | 'text-bottom' | 'sub' | 'super';
+  textIndent?: CSSPropertyValue;
+  
+  // Colors & Backgrounds
+  color?: CSSPropertyValue;
+  background?: CSSPropertyValue;
+  backgroundColor?: CSSPropertyValue;
+  backgroundImage?: CSSPropertyValue;
+  backgroundRepeat?: 'repeat' | 'repeat-x' | 'repeat-y' | 'no-repeat' | 'space' | 'round';
+  backgroundSize?: CSSPropertyValue;
+  backgroundPosition?: CSSPropertyValue;
+  backgroundAttachment?: 'scroll' | 'fixed' | 'local';
+  backgroundClip?: 'border-box' | 'padding-box' | 'content-box' | 'text';
+  backgroundOrigin?: 'border-box' | 'padding-box' | 'content-box';
+  opacity?: CSSPropertyValue;
+  
+  // Shadow & Filter
+  boxShadow?: CSSPropertyValue;
+  textShadow?: CSSPropertyValue;
+  filter?: CSSPropertyValue;
+  backdropFilter?: CSSPropertyValue;
+  
+  // Transform & Animation
+  transform?: CSSPropertyValue;
+  transformOrigin?: CSSPropertyValue;
+  transformStyle?: 'flat' | 'preserve-3d';
+  transition?: CSSPropertyValue;
+  transitionProperty?: CSSPropertyValue;
+  transitionDuration?: CSSPropertyValue;
+  transitionTimingFunction?: CSSPropertyValue;
+  transitionDelay?: CSSPropertyValue;
+  animation?: CSSPropertyValue;
+  animationName?: CSSPropertyValue;
+  animationDuration?: CSSPropertyValue;
+  animationTimingFunction?: CSSPropertyValue;
+  animationDelay?: CSSPropertyValue;
+  animationIterationCount?: CSSPropertyValue;
+  animationDirection?: 'normal' | 'reverse' | 'alternate' | 'alternate-reverse';
+  animationFillMode?: 'none' | 'forwards' | 'backwards' | 'both';
+  animationPlayState?: 'running' | 'paused';
+  
+  // Visibility & Overflow
+  visibility?: 'visible' | 'hidden' | 'collapse';
+  overflow?: 'visible' | 'hidden' | 'scroll' | 'auto' | 'clip';
+  overflowX?: 'visible' | 'hidden' | 'scroll' | 'auto' | 'clip';
+  overflowY?: 'visible' | 'hidden' | 'scroll' | 'auto' | 'clip';
+  overscrollBehavior?: 'auto' | 'none' | 'contain';
+  overscrollBehaviorX?: 'auto' | 'none' | 'contain';
+  overscrollBehaviorY?: 'auto' | 'none' | 'contain';
+  
+  // List
+  listStyle?: CSSPropertyValue;
+  listStyleType?: CSSPropertyValue;
+  listStylePosition?: 'inside' | 'outside';
+  listStyleImage?: CSSPropertyValue;
+  
+  // Table
+  tableLayout?: 'auto' | 'fixed';
+  borderCollapse?: 'collapse' | 'separate';
+  borderSpacing?: CSSPropertyValue;
+  
+  // Outline
+  outline?: CSSPropertyValue;
+  outlineWidth?: CSSPropertyValue;
+  outlineStyle?: 'none' | 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset';
+  outlineColor?: CSSPropertyValue;
+  outlineOffset?: CSSPropertyValue;
+  
+  // Cursor & Pointer
+  cursor?: CSSPropertyValue;
+  pointerEvents?: 'auto' | 'none' | 'visiblePainted' | 'visibleFill' | 'visibleStroke' | 'all';
+  touchAction?: 'auto' | 'none' | 'pan-x' | 'pan-y' | 'pan-left' | 'pan-right' | 'pan-up' | 'pan-down' | 'pinch-zoom' | 'manipulation';
+  
+  // User Select
+  userSelect?: 'auto' | 'none' | 'text' | 'all';
+  
+  // Content
+  content?: CSSPropertyValue;
+  quotes?: CSSPropertyValue;
+  
+  // Clip & Mask
+  clipPath?: CSSPropertyValue;
+  clipRule?: 'nonzero' | 'evenodd';
+  mask?: CSSPropertyValue;
+  maskImage?: CSSPropertyValue;
+  maskSize?: CSSPropertyValue;
+  maskPosition?: CSSPropertyValue;
+  maskRepeat?: CSSPropertyValue;
+  
+  // Object Fit
+  objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
+  objectPosition?: CSSPropertyValue;
+  
+  // Resize & Scroll
+  resize?: 'none' | 'both' | 'horizontal' | 'vertical';
+  scrollBehavior?: 'auto' | 'smooth';
+  scrollSnapType?: 'none' | 'x mandatory' | 'y mandatory' | 'both mandatory';
+  scrollSnapAlign?: 'none' | 'start' | 'end' | 'center';
+  
+  // Column
+  columnCount?: CSSPropertyValue;
+  columnWidth?: CSSPropertyValue;
+  columnRule?: CSSPropertyValue;
+  columnSpan?: 'none' | 'all';
+  
+  // Break
+  breakBefore?: 'auto' | 'avoid' | 'always' | 'all' | 'avoid-page' | 'page' | 'left' | 'right' | 'recto' | 'verso';
+  breakAfter?: 'auto' | 'avoid' | 'always' | 'all' | 'avoid-page' | 'page' | 'left' | 'right' | 'recto' | 'verso';
+  breakInside?: 'auto' | 'avoid' | 'avoid-page' | 'avoid-column';
+  
+  // Hyphens & Writing
+  hyphens?: 'none' | 'manual' | 'auto';
+  writingMode?: 'horizontal-tb' | 'vertical-rl' | 'vertical-lr';
+  direction?: 'ltr' | 'rtl';
+  unicodeBidi?: 'normal' | 'embed' | 'bidi-override' | 'isolate' | 'isolate-override' | 'plaintext';
+  
+  // Accent Color
+  accentColor?: CSSPropertyValue;
+  caretColor?: CSSPropertyValue;
+  
+  // Mix Blend
+  mixBlendMode?: 'normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'color-dodge' | 'color-burn' | 'hard-light' | 'soft-light' | 'difference' | 'exclusion' | 'hue' | 'saturation' | 'color' | 'luminosity';
+  isolation?: 'auto' | 'isolate';
+  
+  // Will Change
+  willChange?: CSSPropertyValue;
+  
+  // Zoom
+  zoom?: CSSPropertyValue;
+  scale?: CSSPropertyValue;
+  
+  // Print
+  orphans?: CSSPropertyValue;
+  widows?: CSSPropertyValue;
+  
+  // SVG Properties
+  fill?: CSSPropertyValue;
+  stroke?: CSSPropertyValue;
+  strokeWidth?: CSSPropertyValue;
+  strokeLinecap?: 'butt' | 'round' | 'square';
+  strokeLinejoin?: 'miter' | 'round' | 'bevel';
+  strokeDasharray?: CSSPropertyValue;
+  strokeDashoffset?: CSSPropertyValue;
+  strokeMiterlimit?: CSSPropertyValue;
+  strokeOpacity?: CSSPropertyValue;
+  fillOpacity?: CSSPropertyValue;
+  fillRule?: 'nonzero' | 'evenodd';
 }
 
 /**
+ * CSS Custom Properties (variables)
+ */
+export interface CSSCustomProperties {
+  [property: `--${string}`]: CSSPropertyValue;
+}
+
+/**
+ * Vendor prefixed properties
+ */
+export interface VendorCSSProperties {
+  WebkitAlignContent?: CSSPropertyValue;
+  WebkitAlignItems?: CSSPropertyValue;
+  WebkitAlignSelf?: CSSPropertyValue;
+  WebkitAnimation?: CSSPropertyValue;
+  WebkitAppearance?: CSSPropertyValue;
+  WebkitBackdropFilter?: CSSPropertyValue;
+  WebkitBackgroundClip?: CSSPropertyValue;
+  WebkitBoxOrient?: CSSPropertyValue;
+  WebkitBoxSizing?: CSSPropertyValue;
+  WebkitFlex?: CSSPropertyValue;
+  WebkitFlexBasis?: CSSPropertyValue;
+  WebkitFlexDirection?: CSSPropertyValue;
+  WebkitFlexFlow?: CSSPropertyValue;
+  WebkitFlexGrow?: CSSPropertyValue;
+  WebkitFlexShrink?: CSSPropertyValue;
+  WebkitFlexWrap?: CSSPropertyValue;
+  WebkitJustifyContent?: CSSPropertyValue;
+  WebkitLineClamp?: CSSPropertyValue;
+  WebkitOrder?: CSSPropertyValue;
+  WebkitPerspective?: CSSPropertyValue;
+  WebkitTapHighlightColor?: CSSPropertyValue;
+  WebkitTextFillColor?: CSSPropertyValue;
+  WebkitTextStroke?: CSSPropertyValue;
+  WebkitTransform?: CSSPropertyValue;
+  WebkitTransformOrigin?: CSSPropertyValue;
+  WebkitTransformStyle?: CSSPropertyValue;
+  WebkitTransition?: CSSPropertyValue;
+  WebkitUserSelect?: CSSPropertyValue;
+  MozAppearance?: CSSPropertyValue;
+  MozOsxFontSmoothing?: CSSPropertyValue;
+  MozTapHighlightColor?: CSSPropertyValue;
+  MozTransform?: CSSPropertyValue;
+  MozTransition?: CSSPropertyValue;
+  MozUserSelect?: CSSPropertyValue;
+  msHyphens?: CSSPropertyValue;
+  msOverflowStyle?: CSSPropertyValue;
+  msTransform?: CSSPropertyValue;
+  msTransition?: CSSPropertyValue;
+  OTextOverflow?: CSSPropertyValue;
+}
+
+/**
+ * Complete CSS properties combining standard, custom, and vendor properties
+ */
+export type CSSProperties = StandardCSSProperties & CSSCustomProperties & VendorCSSProperties;
+
+/**
  * Utility function type for transforming values into CSS properties
- * Utils enable shorthand properties and custom transformations
  */
 export interface AnyUtils {
   [name: string]: (...args: readonly unknown[]) => CSSProperties;
@@ -32,7 +394,6 @@ export interface AnyUtils {
 
 /**
  * CSS object enhanced with utility function support
- * Allows using utility functions directly in style objects
  */
 export type CSSWithUtils<TUtils extends AnyUtils> = CSSProperties & {
   [K in keyof TUtils]?: Parameters<TUtils[K]>[0];
@@ -242,23 +603,25 @@ export interface TransformContext {
  * Props for styled components with variant support
  */
 export type StyledComponentProps<
-  T extends keyof JSX.IntrinsicElements | React.ComponentType<any>,
+  TElement extends string | React.ComponentType<any>,
   TVariants extends VariantDefinition,
-> = T extends keyof JSX.IntrinsicElements
-  ? JSX.IntrinsicElements[T] &
+> = TElement extends keyof React.JSX.IntrinsicElements
+  ? React.JSX.IntrinsicElements[TElement] &
       VariantProps<TVariants> & {
         css?: CSSProperties;
         className?: string;
-        as?: keyof JSX.IntrinsicElements;
+        as?: keyof React.JSX.IntrinsicElements;
         asChild?: boolean;
       }
-  : React.ComponentProps<T> &
-      VariantProps<TVariants> & {
-        css?: CSSProperties;
-        className?: string;
-        as?: React.ComponentType<any>;
-        asChild?: boolean;
-      };
+  : TElement extends React.ComponentType<infer P>
+    ? P &
+        VariantProps<TVariants> & {
+          css?: CSSProperties;
+          className?: string;
+          as?: React.ComponentType<any>;
+          asChild?: boolean;
+        }
+    : never;
 
 /**
  * Recipe composition options for runtime merging
@@ -654,59 +1017,5 @@ export interface LoadResult {
 }
 
 // ============================================================================
-// EXPORT ALL TYPES
+// END OF FILE - All types are already exported individually above
 // ============================================================================
-
-export type {
-  CSSPropertyValue,
-  AnyUtils,
-  CSSWithUtils,
-  UtilsFn,
-  VariantDefinition,
-  VariantProps,
-  CompoundVariant,
-  StyledConfig,
-  ThemeScaleMap,
-  ThemeTokens,
-  MediaQueries,
-  MantraConfig,
-  StyledRecipe,
-  CSSResult,
-  ThemeResult,
-  GlobalCSSResult,
-  KeyframesResult,
-  HashFunction,
-  StringifyCSSFunction,
-  StyleTransform,
-  TransformContext,
-  StyledComponentProps,
-  RecipeComposeOptions,
-  SlotDefinition,
-  SlotRecipe,
-  MultiVariantRecipe,
-  AtomicClass,
-  StyleSheet,
-  ExtractionContext,
-  CompilerOptions,
-  ExtractionResult,
-  ExtractionError,
-  CompilerPlugin,
-  PluginContext,
-  TransformResult,
-  SourceMap,
-  InjectionOptions,
-  StyleSheetManager,
-  HydrationOptions,
-  ResolvedModule,
-  EmittedFile,
-  ModuleInfo,
-  ResolvedId,
-  Warning,
-  RenderChunk,
-  RenderResult,
-  Bundle,
-  BundlerAdapter,
-  AdapterSetupOptions,
-  AdapterInstance,
-  LoadResult,
-};

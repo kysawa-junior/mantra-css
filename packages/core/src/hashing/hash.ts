@@ -3,15 +3,27 @@
 // Bundler Agnostic Zero-Runtime CSS-in-JS
 // ============================================================================
 // Fast, stable hashing algorithms for CSS class name generation.
-// Optimized for performance and minimal bundle size.
+// Optimized for performance, determinism and SSR compatibility.
 // ============================================================================
+
+/**
+ * Internal counter for unique IDs (resettable for SSR)
+ */
+let _idCounter = 0;
+
+/**
+ * Get current ID counter value
+ */
+export function getIdCounter(): number {
+  return _idCounter;
+}
 
 /**
  * djb2 hash algorithm - fast and small footprint
  * Optimized for CSS class name generation
  * 
  * @param str - Input string to hash
- * @returns Base36 encoded hash string
+ * @returns Base36 encoded hash string (6 chars)
  */
 export function hash(str: string): string {
   let h = 5381;
@@ -29,7 +41,7 @@ export function hash(str: string): string {
  * Uses bit manipulation for maximum speed
  * 
  * @param str - Input string to hash
- * @returns Base36 encoded hash string
+ * @returns Base36 encoded hash string (6 chars)
  */
 export function fastHash(str: string): string {
   let h = 0;
@@ -37,7 +49,7 @@ export function fastHash(str: string): string {
 
   for (let i = 0; i < len; i++) {
     h = (h << 4) - h + str.charCodeAt(i);
-    h &= h; // Keep it 32-bit
+    h |= 0; // Keep it 32-bit
   }
 
   return (h >>> 0).toString(36).padStart(6, '0');
@@ -74,7 +86,7 @@ export function hashObject(obj: Record<string, unknown>): string {
  * 
  * @param str - Input string to hash
  * @param seed - Optional seed value
- * @returns Base36 encoded hash string
+ * @returns Base36 encoded hash string (8 chars)
  */
 export function murmurHash(str: string, seed = 0): string {
   const len = str.length;
@@ -130,21 +142,36 @@ export function murmurHash(str: string, seed = 0): string {
 }
 
 /**
- * Generate a unique ID with optional prefix
- * Uses a combination of counter and timestamp for uniqueness
+ * Generate a deterministic unique ID
+ * Uses content-based hashing for SSR stability
+ * Falls back to counter-only mode when content is provided
  * 
+ * @param content - Optional content for deterministic ID
  * @param prefix - Optional prefix for the ID
  * @returns Unique identifier string
  */
-let idCounter = 0;
-export function generateId(prefix = 'mantra'): string {
-  const id = `${prefix}-${Date.now().toString(36)}-${(idCounter++).toString(36)}`;
+export function generateId(prefix = 'mantra', content?: string): string {
+  if (content !== undefined) {
+    // Deterministic mode: hash content for SSR stability
+    return `${prefix}-${hash(content)}`;
+  }
+  
+  // Counter mode: for non-SSR or dynamic scenarios
+  const id = `${prefix}-${(_idCounter++).toString(36)}`;
   return id;
 }
 
 /**
- * Reset the ID counter (useful for testing or SSR)
+ * Reset the ID counter (critical for SSR hydration consistency)
+ * Should be called before each SSR render pass
  */
 export function resetIdCounter(): void {
-  idCounter = 0;
+  _idCounter = 0;
+}
+
+/**
+ * Set the ID counter to a specific value (advanced SSR scenarios)
+ */
+export function setIdCounter(value: number): void {
+  _idCounter = value;
 }
