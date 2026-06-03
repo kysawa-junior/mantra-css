@@ -6,6 +6,24 @@
 // This package is bundler-agnostic and contains only pure functions.
 // ============================================================================
 
+import type {
+  AnyUtils,
+  MantraConfig,
+  StyledConfig,
+  StyledRecipe,
+  KeyframesResult,
+  CSSProperties,
+  GlobalCSSResult,
+} from '@mantra/types';
+
+import type { KeyframesDefinition } from './css/generate';
+import {
+  createCSS,
+  createKeyframes,
+  generateCSS,
+  stringifyCSS,
+} from './index.internal';
+
 // Hash utilities
 export {
   hash,
@@ -15,6 +33,8 @@ export {
   murmurHash,
   generateId,
   resetIdCounter,
+  getIdCounter,
+  setIdCounter,
 } from './hashing/hash';
 
 // CSS serialization utilities
@@ -44,7 +64,24 @@ export {
   generateBaseCSS,
   generateCSS,
   mergeStyledConfigs,
+  createKeyframes,
+  createCSS,
+  compose,
+  mergeCSS,
+  transformTokens,
+  type KeyframesDefinition,
 } from './css/generate';
+
+// Advanced CSS processing (nested selectors, pseudo-selectors, media queries)
+export { processNestedCSS } from './css/index';
+
+export type {
+  NestedSelectors,
+  CSSWithPseudo,
+  CSSWithMedia,
+  AdvancedCSSObject,
+  CSSOptions,
+} from './css/index';
 
 // Re-export all types from @mantra/types
 export type {
@@ -112,6 +149,15 @@ export type {
   AdapterSetupOptions,
   AdapterInstance,
   LoadResult,
+  PseudoSelectors,
+  MediaQueryCondition,
+  SupportCondition,
+  TokenReference,
+  CSSVariableReference,
+  BreakpointName,
+  StandardCSSProperties,
+  CSSCustomProperties,
+  VendorCSSProperties,
 } from '@mantra/types';
 
 /**
@@ -120,6 +166,9 @@ export type {
 export function createMantra<TUtils extends AnyUtils>(config: MantraConfig<TUtils> = {} as MantraConfig<TUtils>) {
   const prefix = config.prefix || 'mantra';
   
+  // Create css and keyframes functions with the configured prefix
+  const css = createCSS<TUtils>(prefix);
+  
   function styled<TElement extends string>(
     element: TElement,
     styledConfig: StyledConfig<TUtils>
@@ -127,10 +176,8 @@ export function createMantra<TUtils extends AnyUtils>(config: MantraConfig<TUtil
     return generateCSS(styledConfig, element, prefix);
   }
   
-  function css(styles: CSSWithUtils<AnyUtils>): CSSResult {
-    const className = `${prefix}-${hash(JSON.stringify(styles))}`;
-    const cssText = stringifyCSS(`.${className}`, styles);
-    return { className, cssText };
+  function keyframes(frames: KeyframesDefinition, name?: string): KeyframesResult {
+    return createKeyframes(frames, name, prefix);
   }
   
   function globalCss(styles: Record<string, CSSProperties>): GlobalCSSResult {
@@ -141,20 +188,7 @@ export function createMantra<TUtils extends AnyUtils>(config: MantraConfig<TUtil
     return { cssText };
   }
   
-  function keyframes(name: string, frames: Record<string, CSSProperties>): KeyframesResult {
-    let cssText = `@keyframes ${name}{`;
-    for (const [keyframe, style] of Object.entries(frames)) {
-      cssText += `${keyframe}{`;
-      for (const [prop, value] of Object.entries(style)) {
-        cssText += `${camelToKebab(prop)}:${serializeValue(value, prop)};`;
-      }
-      cssText += '}';
-    }
-    cssText += '}';
-    return { name, cssText };
-  }
-  
-  return { styled, css, globalCss, keyframes, config };
+  return { styled, css, keyframes, globalCss, config };
 }
 
 export const mantra = createMantra();

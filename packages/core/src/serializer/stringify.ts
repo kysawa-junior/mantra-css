@@ -4,33 +4,108 @@
 // ============================================================================
 // Efficient CSS object to string serialization.
 // Optimized for performance with minimal allocations.
+// Uses array-based concatenation for better performance.
 // ============================================================================
 
 import type { CSSProperties, CSSPropertyValue } from '@mantra/types';
 
 /**
+ * Properties that accept unitless numbers (no 'px' suffix)
+ * Cached for performance - computed once at module load
+ */
+const UNITLESS_PROPERTIES = new Set([
+  'animationiterationcount',
+  'aspectratio',
+  'borderimageoutset',
+  'borderimageslice',
+  'borderimagewidth',
+  'columncount',
+  'columns',
+  'flex',
+  'flexgrow',
+  'flexpositive',
+  'flexshrink',
+  'flexnegative',
+  'flexorder',
+  'gridarea',
+  'gridrow',
+  'gridrowend',
+  'gridrowspan',
+  'gridrowstart',
+  'gridcolumn',
+  'gridcolumnend',
+  'gridcolumnspan',
+  'gridcolumnstart',
+  'fontweight',
+  'lineclamp',
+  'lineheight',
+  'opacity',
+  'order',
+  'orphans',
+  'scale',
+  'tabsize',
+  'widows',
+  'zindex',
+  'zoom',
+  'fillopacity',
+  'floodopacity',
+  'stopopacity',
+  'strokedasharray',
+  'strokedashoffset',
+  'strokemiterlimit',
+  'strokeopacity',
+  'strokewidth',
+]);
+
+/**
  * Convert camelCase CSS property name to kebab-case
  * Handles vendor prefixes and custom properties
+ * Optimized with early returns for common cases
  * 
  * @param prop - CSS property name in camelCase
  * @returns CSS property name in kebab-case
  */
 export function camelToKebab(prop: string): string {
-  // Handle vendor prefixes first
-  if (prop.startsWith('webkit')) return `-webkit-${prop.slice(6).replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-  if (prop.startsWith('moz')) return `-moz-${prop.slice(3).replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-  if (prop.startsWith('ms')) return `-ms-${prop.slice(2).replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-  if (prop.startsWith('o')) return `-o-${prop.slice(1).replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+  // Fast path: custom properties (CSS variables)
+  if (prop.charCodeAt(0) === 45 && prop.charCodeAt(1) === 45) { // '--'
+    return prop;
+  }
   
-  // Handle custom properties (CSS variables)
-  if (prop.startsWith('--')) return prop;
+  // Vendor prefixes - optimized checks
+  const firstChar = prop.charCodeAt(0);
+  
+  if (firstChar === 119) { // 'w' - webkit
+    if (prop.startsWith('webkit')) {
+      return `-webkit-${prop.slice(6).replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+    }
+  } else if (firstChar === 109) { // 'm' - moz, ms
+    if (prop.startsWith('moz')) {
+      return `-moz-${prop.slice(3).replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+    } else if (prop.startsWith('ms')) {
+      return `-ms-${prop.slice(2).replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+    }
+  } else if (firstChar === 111) { // 'o' - o
+    if (prop.startsWith('o')) {
+      return `-o-${prop.slice(1).replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+    }
+  }
   
   // Standard camelCase to kebab-case conversion
-  return prop.replace(/([A-Z])/g, '-$1').toLowerCase();
+  let result = '';
+  for (let i = 0; i < prop.length; i++) {
+    const code = prop.charCodeAt(i);
+    if (code >= 65 && code <= 90) { // A-Z
+      result += '-' + String.fromCharCode(code + 32); // to lowercase
+    } else {
+      result += prop[i];
+    }
+  }
+  return result;
 }
 
 /**
  * Serialize a single CSS value, handling numbers and special cases
+ * Optimized with Set lookup for unitless properties
  * 
  * @param value - CSS property value
  * @param property - The CSS property name (for context-aware conversion)
@@ -43,52 +118,10 @@ export function serializeValue(value: CSSPropertyValue, property: string): strin
   
   // Number values: auto-add px for properties that accept it
   if (typeof value === 'number') {
-    // Properties that accept unitless numbers
-    const unitlessProperties = [
-      'animationIterationCount',
-      'aspectRatio',
-      'borderImageOutset',
-      'borderImageSlice',
-      'borderImageWidth',
-      'columnCount',
-      'columns',
-      'flex',
-      'flexGrow',
-      'flexPositive',
-      'flexShrink',
-      'flexNegative',
-      'flexOrder',
-      'gridArea',
-      'gridRow',
-      'gridRowEnd',
-      'gridRowSpan',
-      'gridRowStart',
-      'gridColumn',
-      'gridColumnEnd',
-      'gridColumnSpan',
-      'gridColumnStart',
-      'fontWeight',
-      'lineClamp',
-      'lineHeight',
-      'opacity',
-      'order',
-      'orphans',
-      'scale',
-      'tabSize',
-      'widows',
-      'zIndex',
-      'zoom',
-      'fillOpacity',
-      'floodOpacity',
-      'stopOpacity',
-      'strokeDasharray',
-      'strokeDashoffset',
-      'strokeMiterlimit',
-      'strokeOpacity',
-      'strokeWidth',
-    ];
+    // Fast case-insensitive lookup using lowercase
+    const lowerProp = property.toLowerCase();
     
-    if (unitlessProperties.some(p => p.toLowerCase() === property.toLowerCase())) {
+    if (UNITLESS_PROPERTIES.has(lowerProp)) {
       return String(value);
     }
     
@@ -101,6 +134,7 @@ export function serializeValue(value: CSSPropertyValue, property: string): strin
 /**
  * Serializes a JavaScript CSS object into a standard CSS string
  * Optimized for performance with minimal allocations
+ * Uses array-based string building for better performance
  * 
  * @param selector - CSS selector (e.g., '.className', '#id', 'div')
  * @param styleObj - CSS properties object
@@ -108,13 +142,14 @@ export function serializeValue(value: CSSPropertyValue, property: string): strin
  */
 export function stringifyCSS(selector: string, styleObj: CSSProperties): string {
   const rules: string[] = [];
+  let hasRules = false;
   
   for (const key in styleObj) {
     if (!Object.prototype.hasOwnProperty.call(styleObj, key)) {
       continue;
     }
     
-    const value = styleObj[key];
+    const value = (styleObj as Record<string, any>)[key];
     
     if (value === undefined || value === null) {
       continue;
@@ -125,10 +160,11 @@ export function stringifyCSS(selector: string, styleObj: CSSProperties): string 
     
     if (cssValue) {
       rules.push(`${cssProperty}:${cssValue}`);
+      hasRules = true;
     }
   }
   
-  if (rules.length === 0) {
+  if (!hasRules) {
     return '';
   }
   
@@ -152,13 +188,14 @@ export function stringifyCSSMultiple(
   }
   
   const rules: string[] = [];
+  let hasRules = false;
   
   for (const key in styleObj) {
     if (!Object.prototype.hasOwnProperty.call(styleObj, key)) {
       continue;
     }
     
-    const value = styleObj[key];
+    const value = (styleObj as Record<string, any>)[key];
     
     if (value === undefined || value === null) {
       continue;
@@ -169,10 +206,11 @@ export function stringifyCSSMultiple(
     
     if (cssValue) {
       rules.push(`${cssProperty}:${cssValue}`);
+      hasRules = true;
     }
   }
   
-  if (rules.length === 0) {
+  if (!hasRules) {
     return '';
   }
   
@@ -253,13 +291,11 @@ export function createCSSVariable(name: string, value: string | number): string 
  * @returns CSS var() reference string
  */
 export function cssVar(name: string, fallback?: string | number): string {
-  const fallbackValue = fallback !== undefined
-    ? (typeof fallback === 'number' ? `${fallback}px` : String(fallback))
-    : undefined;
-  
-  return fallbackValue !== undefined
-    ? `var(--${name},${fallbackValue})`
-    : `var(--${name})`;
+  if (fallback !== undefined) {
+    const stringValue = typeof fallback === 'number' ? `${fallback}px` : String(fallback);
+    return `var(--${name},${stringValue})`;
+  }
+  return `var(--${name})`;
 }
 
 /**
@@ -270,7 +306,7 @@ export function cssVar(name: string, fallback?: string | number): string {
  * @returns Variable name or null if not a token reference
  */
 export function parseTokenRef(token: string): string | null {
-  if (token.startsWith('$')) {
+  if (token.length > 0 && token.charCodeAt(0) === 36) { // '$'
     return token.slice(1);
   }
   return null;
@@ -285,15 +321,22 @@ export function parseTokenRef(token: string): string | null {
 export function buildStyleSheet(
   rules: Array<{ selector: string; styles: CSSProperties }>
 ): string {
-  return rules
-    .map((rule) => stringifyCSS(rule.selector, rule.styles))
-    .filter(Boolean)
-    .join('');
+  const result: string[] = [];
+  
+  for (const rule of rules) {
+    const css = stringifyCSS(rule.selector, rule.styles);
+    if (css) {
+      result.push(css);
+    }
+  }
+  
+  return result.join('');
 }
 
 /**
  * Minify CSS by removing unnecessary whitespace
  * Basic minification for build-time optimization
+ * Uses regex chains for performance
  * 
  * @param css - CSS string to minify
  * @returns Minified CSS string

@@ -1,7 +1,7 @@
 {
-  "name": "@mantra/types",
+  "name": "@mantra/compiler",
   "version": "1.0.0",
-  "description": "Shared type definitions for Mantra CSS - Bundler Agnostic",
+  "description": "Mantra CSS compiler for build-time extraction",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -11,17 +11,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    },
-    "./package.json": "./package.json"
+    }
   },
-  "sideEffects": false,
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean --outDir dist",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch --outDir dist",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@types/react": "^19.0.0"
+    "@mantra/core": "workspace:*",
+    "@mantra/types": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.4.0",
@@ -29,5 +28,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "sideEffects": false
 }

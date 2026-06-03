@@ -9,7 +9,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@mantra-css/core": "workspace:*"
+    "@mantra/core": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=19.0.0"
